@@ -24,13 +24,14 @@ jobs:
     - name: Test
       run: go test -mod=vendor -v ./...
 
-    - name: Build
-      run: go build -mod=vendor
-
     - name: Get the version
       id: get_version
-      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/pull\//}
-    
+      run: |
+        echo ::set-output name=VERSION::v0.0.1-dev
+
+    - name: Build
+      run: go build -mod=vendor -o affected-${{ steps.get_version.outputs.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}
+
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
@@ -38,4 +39,4 @@ jobs:
         prerelease: true
         title: "Development Build"
         files: |
-          affected
+          affected-${{ steps.get_version.outputs.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}
