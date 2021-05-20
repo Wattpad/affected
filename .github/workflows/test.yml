@@ -1,4 +1,4 @@
-name: Go
+name: Test
 
 on:
   push:
@@ -10,6 +10,9 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    env:
+      GOOS: linux
+      GOARCH: amd64
     steps:
     - uses: actions/checkout@v2
 
@@ -20,3 +23,19 @@ jobs:
 
     - name: Test
       run: go test -mod=vendor -v ./...
+
+    - name: Build
+      run: go build -mod=vendor
+
+    - name: Get the version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/heads\//}
+    
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest_${{ steps.get_version.outputs.VERSION }}"
+        prerelease: true
+        title: "Development Build"
+        files: |
+          affected
