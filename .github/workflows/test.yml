@@ -1,4 +1,4 @@
-name: Go
+name: Test
 
 on:
   push:
@@ -27,10 +27,14 @@ jobs:
     - name: Build
       run: go build -mod=vendor
 
+    - name: Get the version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/heads\//}
+    
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "latest"
+        automatic_release_tag: "latest_${{ steps.get_version.outputs.VERSION }}"
         prerelease: true
         title: "Development Build"
         files: |
