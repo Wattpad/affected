@@ -1,5 +1,4 @@
-name: Test
-
+name: test
 on:
   push:
     branches: [ master ]
@@ -10,9 +9,6 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    env:
-      GOOS: linux
-      GOARCH: amd64
     steps:
     - uses: actions/checkout@v2
 
@@ -24,19 +20,5 @@ jobs:
     - name: Test
       run: go test -mod=vendor -v ./...
 
-    - name: Get the version
-      id: get_version
-      run: |
-        echo ::set-output name=VERSION::v0.0.1-dev
-
     - name: Build
-      run: go build -mod=vendor -o affected-${{ steps.get_version.outputs.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}
-
-    - uses: "marvinpinto/action-automatic-releases@latest"
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        automatic_release_tag: "latest_${{ steps.get_version.outputs.VERSION }}"
-        prerelease: true
-        title: "Development Build"
-        files: |
-          affected-${{ steps.get_version.outputs.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}
+      run: go build -mod=vendor
