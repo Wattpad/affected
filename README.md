@@ -1,5 +1,7 @@
 # Affected
 
+Forked from: [jharlap/affected](https://github.com/jharlap/affected)
+
 Affected queries a git repository for a commit range and determines which Go packages are affected, either because their source was modified or because they depend (directly or transitively) on an affected package. This is useful when working in a monorepo to speed up CI tests/builds and for reducing the number of components redeployed by a CD pipeline. A package is considered modified if any file within that package directory was modified. The downside of this is that changing a text file in a library imported by many packages can cause excessive false positives,but was chosen as a strategy because that text file could be part of bindata or similar, thus there's no way to safely know which files are not really part of the program source.
 
 ## Usage
