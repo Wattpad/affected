@@ -37,7 +37,6 @@ func main() {
 	repo := gitRoot()
 
 	pkgSeen := make(map[string]bool)
-	var modifiedPackages []*build.Package
 	buildContext := build.Default
 	for _, f := range files {
 		if isIgnored(f) {
@@ -59,7 +58,6 @@ func main() {
 		}
 
 		pkgSeen[pkg.ImportPath] = true
-		modifiedPackages = append(modifiedPackages, pkg)
 	}
 
 	// TODO: list all packages in the repo, determine dependency tree and filter package list to those that transitively import affected packages
@@ -72,6 +70,10 @@ func main() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Could not read package %s: %s\n", importPath, err)
 			scanErr = err
+			return
+		}
+
+		if isIgnored(importPath) {
 			return
 		}
 
@@ -96,8 +98,8 @@ func main() {
 
 	// filter the package list to those affected
 	var affectedPackages []string
-	for _, p := range modifiedPackages {
-		affectedPackages = append(affectedPackages, p.ImportPath)
+	for path := range pkgSeen {
+		affectedPackages = append(affectedPackages, path)
 	}
 	addedMore := true
 	for addedMore {
