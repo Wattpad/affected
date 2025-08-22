@@ -17,14 +17,14 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.22
+        go-version: 1.24
 
     - name: Get the version
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
 
     - name: Build
-      run: go build -mod=vendor -o affected-${{ steps.get_version.outputs.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}
+      run: go build -o affected-${{ steps.get_version.outputs.VERSION }}-${{ env.GOOS }}-${{ env.GOARCH }}
 
     - uses: "marvinpinto/action-automatic-releases@v1.2.0"
       with:

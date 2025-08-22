@@ -39,6 +39,10 @@ func main() {
 	pkgSeen := make(map[string]bool)
 	buildContext := build.Default
 	for _, f := range files {
+		if strings.Contains(f, "wattpad/src/services/homeslice") {
+			pkgSeen["services/homeslice"] = true
+		}
+
 		if isIgnored(f) {
 			continue
 		}

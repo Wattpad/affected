@@ -15,3 +15,5 @@ The output is a list of packages which are affected by the commits, ignoring std
 ## Requirements
 
 `affected` requires `git` to be available in the path, and will only work on git-managed repos.
+
+To build for linux amd64 `docker run --rm --platform=linux/amd64 -v "$(pwd)":/workspace -w /workspace golang:1.24 bash -c "go build -o affected-v0.1.3-linux-amd64`. Substitute as needed.

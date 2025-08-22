@@ -1,5 +1,5 @@
 module github.com/Wattpad/affected
 
-go 1.16
+go 1.24
 
-require golang.org/x/tools v0.0.0-20160829183839-9deed8c6c1c8
+require golang.org/x/tools v0.36.0
