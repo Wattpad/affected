@@ -41,6 +41,8 @@ func main() {
 	for _, f := range files {
 		if strings.Contains(f, "wattpad/src/services/homeslice") {
 			pkgSeen["services/homeslice"] = true
+		} else if strings.Contains(f, "wattpad/src/services/home") {
+			pkgSeen["services/home"] = true
 		}
 
 		if isIgnored(f) {
