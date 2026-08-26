@@ -45,6 +45,12 @@ func main() {
 
 		pkg, err := buildutil.ContainingPackage(&buildContext, cwd, f)
 		if err != nil {
+			// No package in the file's dir (e.g. a go.mod-only module root):
+			// fall back to the enclosing module.
+			if p, ok := containingModule(&buildContext, f); ok {
+				pkgSeen[p] = true
+				continue
+			}
 			fmt.Fprintf(os.Stderr, "Error finding package for file %s: %s\n", f, err)
 			continue
 		}
@@ -67,13 +73,13 @@ func main() {
 		scanErr error
 	)
 	buildutil.ForEachPackage(&buildContext, func(importPath string, err error) {
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Could not read package %s: %s\n", importPath, err)
-			scanErr = err
+		if isIgnored(importPath) {
 			return
 		}
 
-		if isIgnored(importPath) {
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Could not read package %s: %s\n", importPath, err)
+			scanErr = err
 			return
 		}
 
@@ -88,6 +94,13 @@ func main() {
 		}
 
 		for _, imp := range pkg.Imports {
+			imports[imp] = append(imports[imp], importPath)
+		}
+		// Test-only dependencies affect their importers too.
+		for _, imp := range pkg.TestImports {
+			imports[imp] = append(imports[imp], importPath)
+		}
+		for _, imp := range pkg.XTestImports {
 			imports[imp] = append(imports[imp], importPath)
 		}
 
@@ -150,6 +163,24 @@ func isIgnored(f string) bool {
 		}
 	}
 	return false
+}
+
+// containingModule walks up from f looking for a go.mod, and returns the
+// module root as an import path (i.e. relative to a GOPATH src dir).
+func containingModule(ctxt *build.Context, f string) (string, bool) {
+	for dir := filepath.Dir(f); ; dir = filepath.Dir(dir) {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			for _, src := range ctxt.SrcDirs() {
+				if rel, err := filepath.Rel(src, dir); err == nil && !strings.HasPrefix(rel, "..") {
+					return filepath.ToSlash(rel), true
+				}
+			}
+			return "", false
+		}
+		if dir == filepath.Dir(dir) {
+			return "", false
+		}
+	}
 }
 
 func gitRoot() string {
